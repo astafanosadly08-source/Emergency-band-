@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام تسجيل أسورة الطوارئ الطبية - LifeTag</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 15px; margin: 0; }
+    .container { max-width: 500px; margin: 20px auto; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    h2 { color: #1e3a8a; text-align: center; margin-top: 0; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; color: #334155; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #1d4ed8; }
+    #qr-result { text-align: center; margin-top: 20px; padding: 15px; border-top: 2px dashed #e2e8f0; display: none; }
+    #qrcode { margin: 15px auto; display: inline-block; }
+    .pin-badge { font-size: 18px; color: #dc2626; font-weight: bold; background: #fee2e2; padding: 4px 12px; border-radius: 6px; display: inline-block; margin-top: 5px; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>أسورة الطوارئ الطبية 🩺</h2>
+  
+  <form id="patientForm">
+    <div class="form-group">
+      <label>اسم المريض الثلاثي:</label>
+      <input type="text" id="fullName" required placeholder="أحمد محمود علي">
+    </div>
+
+    <div class="form-group">
+      <label>فصيلة الدم:</label>
+      <select id="bloodType" required>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>الحساسية القاتلة (الطبقة الأولى):</label>
+      <input type="text" id="allergies" placeholder="حساسية بنسلين، أسبيرين...">
+    </div>
+
+    <div class="form-group">
+      <label>الأمراض المزمنة الحرجة:</label>
+      <input type="text" id="chronicDiseases" placeholder="مريض سكر نوع أول، ضغط دم...">
+    </div>
+
+    <div class="form-group">
+      <label>رقم هاتف الطوارئ (الأهل):</label>
+      <input type="tel" id="emergencyContact" required placeholder="01012345678">
+    </div>
+
+    <div class="form-group">
+      <label>رمز الأمان PIN (4 أرقام محفورة على الأسورة):</label>
+      <input type="text" id="pinCode" maxlength="4" required placeholder="1492">
+    </div>
+
+    <div class="form-group">
+      <label>السجل الطبي التفصيلي (الطبقة الثانية - محمي بـ PIN):</label>
+      <textarea id="fullHistory" rows="3" placeholder="عمليات جراحية سابقة، أدوية منتظمة..."></textarea>
+    </div>
+
+    <button type="submit">حفظ البيانات وتوليد الـ QR Code</button>
+  </form>
+
+  <div id="qr-result">
+    <h3>تم توليد الـ QR Code بنجاح! 🎉</h3>
+    <p style="font-size: 13px; color: #64748b;">قم بمسح الكود بكاميرا الموبايل لتجربة صفحة الطوارئ:</p>
+    <div id="qrcode"></div>
+    <div>رمز الـ PIN المحفور على الأسورة: <br><span id="displayPin" class="pin-badge"></span></div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('patientForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const patientData = {
+      fullName: document.getElementById('fullName').value,
+      bloodType: document.getElementById('bloodType').value,
+      allergies: document.getElementById('allergies').value,
+      chronicDiseases: document.getElementById('chronicDiseases').value,
+      emergencyContact: document.getElementById('emergencyContact').value,
+      pinCode: document.getElementById('pinCode').value,
+      fullHistory: document.getElementById('fullHistory').value
+    };
+
+    localStorage.setItem('emergency_patient', JSON.stringify(patientData));
+
+    const currentUrl = window.location.href.split('?')[0];
+    const qrcodeContainer = document.getElementById('qrcode');
+    qrcodeContainer.innerHTML = "";
+    
+    new QRCode(qrcodeContainer, {
+      text: currentUrl + '?view=emergency',
+      width: 160,
+      height: 160
+    });
+
+    document.getElementById('displayPin').innerText = patientData.pinCode;
+    document.getElementById('qr-result').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>
